@@ -1,6 +1,6 @@
 loadkeys es
 #ip link set wlan0 up
-#wpa_passphrase MIWIFI_2G_kj7J > /etc/wifi
+#wpa_passphrase MIWIFI_2G_kj7J sfV6mxne > /etc/wifi
 #wpa_supplicant -B -i wlan0 -D wext -c /etc/wifi
 #dhclient
 mkswap /dev/nvme0n1p6
@@ -12,20 +12,50 @@ mkdir -p /mnt/boot
 mount /dev/nvme0n1p2 /mnt/boot
 mkdir -p /mnt/home
 mount /dev/nvme0n1p8 /mnt/home
+
+====================1==========================
 pacstrap /mnt base linux linux-firmware nano networkmanager dhcpcd netctl wpa_supplicant dialog
 genfstab -U /mnt >> /mnt/etc/fstab
 arch-chroot /mnt /bin/bash
-nano /etc/locale.gen
+====================================================
 locale-gen
-echo LANG=es_ES.UTF-8 > /etc/locale.conf
 tzselect
+==========================2==========================
 rm /etc/localtime
 ln -s /usr/share/zoneinfo/Europe/Madrid /etc/localtime
+echo LANG=es_ES.UTF-8 > /etc/locale.conf
 echo MarcosPC > /etc/hostname
+echo "KEYMAP=es" > /etc/vconsole.conf
 echo -e "127.0.0.1    localhost.localdomain    localhost \n::1        localhost.localdomain      localhost \n127.0.0.1    MarcosPC.localdomain     MarcosPC" > /etc/hosts
+hwclock --systohc
+====================================================
+
+nano /etc/locale.gen
+
+#=========Instalar bootctl===========
+bootctl --path=/boot install
+nano /boot/loader/loader.conf
+echo $(blkid -s PARTUUID -o value /dev/sda6) > /boot/loader/entries/arch.conf
+nano /boot/loader/entries/arch.conf
+=====================================
+
 pacman -S iw
 passwd
 exit
 umount -R /mnt
 umount -R /mnt/boot
-#git clone https://github.com/marcossj95/BD2.git
+
+reboot
+==========================3==========================
+su
+systemctl start NetworkManager.service
+systemctl enable NetworkManager.service
+ip link
+ip link set wlp0s1 up
+nmcli dev wifi connect MIFI_2G_kj7J password sfV6mxne
+pacman -S xorg-server xorg-xinit sddm xf86-video-nouveau plasma
+==============================================================================
+systemctl enable sddm.service
+systemctl start sddm.service
+
+
