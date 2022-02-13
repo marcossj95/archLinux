@@ -1,0 +1,1 @@
+echo $(blkid -s PARTUUID -o value /dev/sdaX) > /boot/loader/entries/arch.conf
